@@ -3,11 +3,11 @@ import { tracker } from "./tracker";
 let initialized = false;
 
 function trackElement(el: HTMLElement, app: string) {
-  const raw = el.dataset.trackObject;
+  const raw = el.dataset.eventObject;
   const extra = raw ? JSON.parse(raw) : {};
   tracker.track({
     app,
-    name: el.dataset.track!,
+    name: el.dataset.eventName!,
     data: { ...extra },
   });
 }
@@ -19,20 +19,11 @@ export function initAutoTracking({ app }: { app: string }) {
   document.addEventListener(
     "click",
     (e) => {
-      const el = (e.target as HTMLElement).closest("[data-track]");
+      const el = (e.target as HTMLElement).closest("[data-event-click]");
       if (!el) return;
 
       const htmlEl = el as HTMLElement;
       trackElement(htmlEl, app);
-      // const raw = htmlEl.dataset.trackObject;
-      // const extra = raw ? JSON.parse(raw) : {};
-
-      // tracker.track({
-      //   app,
-      //   name: htmlEl.dataset.track!,
-      //   // data: { text: el.textContent, ...extra },
-      //   data: { ...extra },
-      // });
     },
     true,
   );
@@ -40,13 +31,14 @@ export function initAutoTracking({ app }: { app: string }) {
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (entry.isIntersecting) {
-        trackElement(entry.target as HTMLElement, app);
+        const htmlEl = entry.target as HTMLElement;
+        trackElement(htmlEl, app);
       }
     }
   });
 
   const observeAll = () => {
-    document.querySelectorAll<HTMLElement>("[data-track]").forEach((el) => {
+    document.querySelectorAll<HTMLElement>("[data-event-view]").forEach((el) => {
       observer.observe(el);
     });
   };
@@ -57,8 +49,8 @@ export function initAutoTracking({ app }: { app: string }) {
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
         if (!(node instanceof HTMLElement)) return;
-        if (node.matches("[data-track]")) observer.observe(node);
-        node.querySelectorAll<HTMLElement>("[data-track]").forEach((el) => {
+        if (node.matches("[data-event-view]")) observer.observe(node);
+        node.querySelectorAll<HTMLElement>("[data-event-view]").forEach((el) => {
           observer.observe(el);
         });
       });

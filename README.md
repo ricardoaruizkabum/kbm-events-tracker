@@ -7,8 +7,8 @@ Biblioteca leve de rastreamento de eventos para aplicações React, sem dependê
 ## Funcionalidades
 
 - **Rastreamento manual** via hook `useTrack` em componentes React
-- **Rastreamento automático por clique** via atributo `data-track` no DOM
-- **Rastreamento de visibilidade** via `IntersectionObserver` — dispara quando o elemento entra na viewport
+- **Rastreamento automático** via atributo `data-event-name` no DOM — `data-event-click` para cliques, `data-event-view` para visibilidade
+- **Rastreamento de visibilidade exclusivo** via `IntersectionObserver` — apenas elementos com `data-event-view`
 - **Suporte a elementos dinâmicos** via `MutationObserver`
 - **Múltiplos adapters** simultâneos por aplicação (console, API, Insider, etc.)
 - **Fila isolada por app** com lock de envio e retry automático (500 ms)
@@ -68,33 +68,38 @@ export function CheckoutButton() {
 }
 ```
 
-### 3. Rastreamento automático com `data-track`
+### 3. Rastreamento automático com `data-event-name`
 
-Após chamar `initAutoTracking()`, elementos com `data-track` são rastreados em dois momentos:
+Após chamar `initAutoTracking()`, elementos com `data-event-name` são rastreados de acordo com os atributos booleanos `data-event-click` e `data-event-view`:
 
-| Gatilho | Quando dispara |
+| Atributo | Gatilho |
 |---|---|
-| Clique | Usuário clica no elemento |
-| Visibilidade | Elemento entra na viewport |
+| `data-event-click` | Usuário clica no elemento |
+| `data-event-view` | Elemento entra na viewport (`IntersectionObserver`) |
 
 ```html
 <!-- Rastreado ao clicar -->
-<button data-track="banner_cta_clicked">
+<button
+  data-event-click
+  data-event-name="banner_cta_clicked"
+>
   Saiba mais
 </button>
 
 <!-- Rastreado ao entrar na viewport (impressão) -->
 <div
-  data-track="banner_viewed"
-  data-track-object='{"banner":"black-friday","position":"hero"}'
+  data-event-view
+  data-event-name="banner_viewed"
+  data-event-object='{"banner":"black-friday","position":"hero"}'
 >
   Oferta especial
 </div>
 
 <!-- Clique com dados extras -->
 <button
-  data-track="plan_selected"
-  data-track-object='{"plan":"pro","price":49.9}'
+  data-event-click
+  data-event-name="plan_selected"
+  data-event-object='{"plan":"pro","price":49.9}'
 >
   Assinar plano Pro
 </button>
@@ -111,7 +116,7 @@ O evento gerado tem a estrutura:
 }
 ```
 
-> O campo `data` contém exclusivamente os valores de `data-track-object`. O `textContent` do elemento não é capturado.
+> O campo `data` contém exclusivamente os valores de `data-event-object`. O `textContent` do elemento não é capturado.
 
 ---
 
@@ -179,11 +184,13 @@ Hook React que retorna a função `track` do singleton global.
 
 ### `initAutoTracking({ app }: { app: string }): void`
 
-Ativa rastreamento automático em elementos com `data-track`. Instala três mecanismos:
+Ativa rastreamento automático em elementos com `data-event-name`. Instala três mecanismos:
 
-- **`addEventListener('click', …, true)`** — captura cliques
-- **`IntersectionObserver`** — captura entradas na viewport
-- **`MutationObserver`** — observa elementos adicionados dinamicamente ao DOM
+| Mecanismo | Atributo necessário | Gatilho |
+|---|---|---|
+| `addEventListener('click', …, true)` | `data-event-click` | Usuário clica no elemento |
+| `IntersectionObserver` | `data-event-view` | Elemento entra na viewport |
+| `MutationObserver` | — | Observa novos `[data-event-view]` adicionados ao DOM |
 
 Idempotente — chamadas subsequentes são ignoradas.
 

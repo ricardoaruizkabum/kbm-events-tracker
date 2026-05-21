@@ -11,23 +11,24 @@ export default function App() {
         onClick={() =>
           track({
             app: "demo-app",
-            name: "manual_click",
+            name: "favorite",
             data: { userId: "123", plan: "pro123" },
           })
         }
       >
-        Manual Track
+        Favorite (Manual Track)
       </button>
 
       <br />
       <br />
 
       <button
-        data-track="auto_click"
-        data-track-object='{"userId":"123","plan":"pro123"}'
-        // data-track-object={JSON.stringify({userId:"123",plan:"pro123"})}
+        data-event-click
+        data-event-name="add_to_cart"
+        data-event-object='{"userId":"123","plan":"pro123"}'
+        // data-event-object={JSON.stringify({userId:"123",plan:"pro123"})}
       >
-        Auto Track Button
+        Add To Cart (Auto Track)
       </button>
 
       <div style={{ height: "150vh", display: "flex", alignItems: "flex-end" }}>
@@ -35,8 +36,9 @@ export default function App() {
       </div>
 
       <div
-        data-track="element_viewed"
-        data-track-object='{"section":"bottom-banner","userId":"123"}'
+        data-event-view
+        data-event-name="banner_viewed"
+        data-event-object='{"section":"bottom-banner","userId":"123"}'
         style={{
           padding: 32,
           background: "#e0f7fa",

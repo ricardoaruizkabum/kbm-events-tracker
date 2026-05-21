@@ -6,7 +6,7 @@ Este documento descreve como utilizar a `@kbm/events-tracker` como camada de ras
 
 ## Visão geral
 
-O Insider Web SDK funciona a partir de um array global `window.InsiderQueue` para o qual se faz pushes de dados de usuário, contexto de página e eventos de interação. A `@kbm/events-tracker` se encaixa nesse modelo por meio de um **adapter customizado**: os eventos disparados pela lib (via `useTrack`, `data-track` ou `tracker.track`) são traduzidos e enviados para o `InsiderQueue` de forma transparente.
+O Insider Web SDK funciona a partir de um array global `window.InsiderQueue` para o qual se faz pushes de dados de usuário, contexto de página e eventos de interação. A `@kbm/events-tracker` se encaixa nesse modelo por meio de um **adapter customizado**: os eventos disparados pela lib (via `useTrack`, `data-event-name` ou `tracker.track`) são traduzidos e enviados para o `InsiderQueue` de forma transparente.
 
 ### O que a lib cobre nessa integração
 
@@ -15,7 +15,7 @@ O Insider Web SDK funciona a partir de um array global `window.InsiderQueue` par
 | Inicialização da página (`type: 'user'`, `type: 'product'`, `type: 'init'`) | ❌ — feita no bootstrap da app |
 | Eventos de interação (`custom_event`, `add_to_cart`, `remove_from_cart`) | ✅ — via `insiderAdapter` |
 | Fila com retry automático em caso de falha | ✅ — built-in na lib |
-| Rastreamento automático via atributo `data-track` | ✅ — via `initAutoTracking()` |
+| Rastreamento automático via `data-event-name` com `data-event-click` / `data-event-view` | ✅ — via `initAutoTracking()` |
 
 ---
 
@@ -108,7 +108,7 @@ import App from './App'
 // Registra o adapter do Insider
 tracker.register(insiderAdapter)
 
-// Ativa rastreamento automático via data-track (opcional)
+// Ativa rastreamento automático via data-event-name (opcional)
 initAutoTracking()
 
 createRoot(document.getElementById('root')!).render(<App />)
@@ -250,22 +250,26 @@ track({
 
 ---
 
-### Rastreamento automático via `data-track`
+### Rastreamento automático via `data-event-name`
 
-Após chamar `initAutoTracking()`, qualquer clique em elementos com `data-track` é capturado automaticamente e repassado ao adapter do Insider.
+Após chamar `initAutoTracking()`, elementos com `data-event-name` são rastreados de acordo com os atributos booleanos `data-event-click` e `data-event-view`. Cliques e impressões são capturados automaticamente e repassados ao adapter do Insider.
 
-**Evento simples (custom_event sem parâmetros extras):**
+**Clique simples:**
 ```html
-<button data-track="newsletter_subscribed">
+<button
+  data-event-click
+  data-event-name="newsletter_subscribed"
+>
   Assinar newsletter
 </button>
 ```
 
-**Evento com parâmetros extras via `data-track-object`:**
+**Clique com parâmetros extras via `data-event-object`:**
 ```html
 <button
-  data-track="plan_selected"
-  data-track-object='{"plan":"pro","price":49.9,"billing":"monthly"}'
+  data-event-click
+  data-event-name="plan_selected"
+  data-event-object='{"plan":"pro","price":49.9,"billing":"monthly"}'
 >
   Assinar plano Pro
 </button>
@@ -274,11 +278,23 @@ Após chamar `initAutoTracking()`, qualquer clique em elementos com `data-track`
 **Add to cart via DOM (structured event):**
 ```html
 <button
-  data-track="add_to_cart"
-  data-track-object='{"id":"abc1234","name":"Blue Dress","unit_price":100,"unit_sale_price":95.2,"quantity":1,"taxonomy":["Dresses","Night Dresses"],"url":"https://example.com/dress","product_image_url":"https://example.com/dress.png"}'
+  data-event-click
+  data-event-name="add_to_cart"
+  data-event-object='{"id":"abc1234","name":"Blue Dress","unit_price":100,"unit_sale_price":95.2,"quantity":1,"taxonomy":["Dresses","Night Dresses"],"url":"https://example.com/dress","product_image_url":"https://example.com/dress.png"}'
 >
   Adicionar ao carrinho
 </button>
+```
+
+**Impressão (visibilidade):**
+```html
+<div
+  data-event-view
+  data-event-name="banner_viewed"
+  data-event-object='{"banner_id":"summer-sale","position":"hero"}'
+>
+  Oferta especial
+</div>
 ```
 
 ---

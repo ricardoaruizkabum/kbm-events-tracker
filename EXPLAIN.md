@@ -16,7 +16,7 @@ src/
 ├── tracking/
 │   ├── tracker.ts       # Núcleo: classe Tracker com fila e despacho para adapters
 │   ├── demo-setup.ts    # Demo only: registra os adapters no tracker singleton
-│   └── init-tracker.ts  # Rastreamento automático via atributo data-track no DOM
+│   └── init-tracker.ts  # Rastreamento automático via data-event-name + data-event-click/data-event-view no DOM
 └── types/
     └── index.ts         # Tipos compartilhados: TrackEvent, Adapter
 ```
@@ -27,7 +27,7 @@ src/
 Evento gerado  { app: "minha-app", name: "...", data: {...} }
   │
   ├─ useTrack()  →  tracker.track()   (rastreamento manual em componentes)
-  └─ data-track  →  tracker.track()   (rastreamento automático via DOM)
+  └─ data-event-name  →  tracker.track()   (rastreamento automático via DOM)
             │
             ▼
        Fila isolada por app  Map<app, TrackEvent[]>
@@ -72,7 +72,7 @@ import {
 tracker.register(consoleAdapter, "minha-app"); // imprime no console (útil em dev)
 tracker.register(apiAdapter, "minha-app"); // envia via sendBeacon para /api/events
 
-// Ativa rastreamento automático via data-track (opcional)
+// Ativa rastreamento automático via data-event-name (opcional)
 // O app informado aqui será injetado em todos os eventos gerados automaticamente
 initAutoTracking({ app: "minha-app" });
 
@@ -103,35 +103,42 @@ export default function CheckoutButton() {
 }
 ```
 
-### 3. Rastreamento automático com `data-track`
+### 3. Rastreamento automático com `data-event-name`
 
-Após chamar `initAutoTracking()`, dois tipos de interação são capturados automaticamente em elementos com `data-track`:
+Após chamar `initAutoTracking()`, elementos com `data-event-name` são rastreados de acordo com os atributos booleanos `data-event-click` e `data-event-view`:
 
-- **Clique** — dispara quando o usuário clica no elemento
-- **Visibilidade** — dispara quando o elemento entra na viewport (via `IntersectionObserver`)
+| Atributo | Gatilho |
+|---|---|
+| `data-event-click` | Usuário clica no elemento |
+| `data-event-view` | Elemento entra na viewport (`IntersectionObserver`) |
 
 Elementos adicionados dinamicamente ao DOM também são observados automaticamente via `MutationObserver`.
 
-Use `data-track-object` para incluir dados adicionais no evento:
+Use `data-event-object` para incluir dados adicionais no evento:
 
 ```tsx
-{/* Evento simples — sem dados extras */}
-<button data-track="banner_cta_clicked">
+{/* Clique simples — sem dados extras */}
+<button
+  data-event-click
+  data-event-name="banner_cta_clicked"
+>
   Saiba mais
 </button>
 
-{/* Evento com dados extras via data-track-object (JSON) */}
+{/* Clique com dados extras via data-event-object (JSON) */}
 <button
-  data-track="plan_selected"
-  data-track-object='{"plan":"pro","price":49.9}'
+  data-event-click
+  data-event-name="plan_selected"
+  data-event-object='{"plan":"pro","price":49.9}'
 >
   Assinar plano Pro
 </button>
 
-{/* Rastreado ao entrar na viewport (impressão de banner, por exemplo) */}
+{/* Visibilidade — dispara ao entrar na viewport */}
 <div
-  data-track="banner_viewed"
-  data-track-object='{"banner":"black-friday"}'
+  data-event-view
+  data-event-name="banner_viewed"
+  data-event-object='{"banner":"black-friday"}'
 >
   Oferta especial
 </div>
@@ -148,7 +155,7 @@ O evento gerado terá a estrutura:
 }
 ```
 
-> **Atenção:** O campo `data` contém exclusivamente os valores de `data-track-object`. O `textContent` do elemento **não** é capturado automaticamente — inclua os dados relevantes explicitamente em `data-track-object`.
+> **Atenção:** O campo `data` contém exclusivamente os valores de `data-event-object`. O `textContent` do elemento **não** é capturado automaticamente — inclua os dados relevantes explicitamente em `data-event-object`.
 
 > **Nota:** Cada elemento é observado pelo `IntersectionObserver` a partir do momento em que é montado no DOM. Se o elemento já estiver visível ao ser inserido, o evento de visibilidade dispara imediatamente.
 
@@ -231,13 +238,13 @@ Hook React que retorna a função `track` do singleton global.
 
 ### `initAutoTracking({ app }: { app: string }): void`
 
-Inicia o rastreamento automático de elementos com `data-track`. O `app` informado é injetado em todos os eventos gerados. Internamente, instala três mecanismos:
+Inicia o rastreamento automático de elementos com `data-event-name`. O `app` informado é injetado em todos os eventos gerados. Internamente, instala três mecanismos:
 
-| Mecanismo | Gatilho |
-|---|---|
-| `addEventListener('click', …, true)` | Clique em qualquer elemento com `data-track` |
-| `IntersectionObserver` | Elemento com `data-track` entra na viewport |
-| `MutationObserver` | Novo elemento com `data-track` adicionado ao DOM |
+| Mecanismo | Atributo necessário | Gatilho |
+|---|---|---|
+| `addEventListener('click', …, true)` | `data-event-click` | Usuário clica no elemento |
+| `IntersectionObserver` | `data-event-view` | Elemento entra na viewport |
+| `MutationObserver` | — | Observa novos `[data-event-view]` adicionados ao DOM |
 
 A função é idempotente — chamadas subsequentes são ignoradas.
 
