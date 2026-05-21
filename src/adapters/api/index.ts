@@ -1,11 +1,18 @@
 
 import { Adapter, EventHandler } from '../../types'
-import { viewDetailsHandler } from './handlers'
+import { bannerViewedHandler, viewDetailsHandler } from './handlers'
 
-const eventMap: Record<string, EventHandler> = {
+const eventMap: Record<string, EventHandler<unknown>> = {
   'view_details': viewDetailsHandler,
+  'banner_viewed': bannerViewedHandler
 }
 
 export const apiAdapter: Adapter = async (event) => {
-  eventMap[event.name]?.(event)
+  const handler = eventMap[event.name]
+  if (!handler) {
+    return
+  }
+  
+  const result = handler(event)
+  console.log(`🚀 Adapter: apiAdapter, event: ${event.name}`, result)  
 }

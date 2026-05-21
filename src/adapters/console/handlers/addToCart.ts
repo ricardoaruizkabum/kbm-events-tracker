@@ -1,5 +1,16 @@
 import { EventHandler } from "../../../types"
 
-export const addToCartHandler: EventHandler = (event) => {
-  console.log("Console Adapter - Handling add to cart event:", event)
+type AddToCartResponse = {
+  userId: string
+  productId: string
+  quantity: number
+}
+
+export const addToCartHandler: EventHandler<AddToCartResponse> = (event) => {
+  const { user, product, quantity } = event.data || {}
+  return {
+    userId: user,
+    productId: product,
+    quantity: quantity || 1
+  }
 }

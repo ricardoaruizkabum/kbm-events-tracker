@@ -1,5 +1,14 @@
 import { EventHandler } from "../../../types"
 
-export const viewDetailsHandler: EventHandler = (event) => {
-  console.log("API Adapter - Handling view_details event:", event)
+type ViewDetailsResponse = {
+  userId: string
+  planId: string
+}
+
+export const viewDetailsHandler: EventHandler<ViewDetailsResponse> = (event) => {
+  const { user, plan } = event.data || {}
+  return {
+    userId: user,
+    planId: plan
+  }
 }

@@ -1,5 +1,14 @@
 import { EventHandler } from "../../../types"
 
-export const favoriteHandler: EventHandler = (event) => {
-  console.log("Console Adapter - Handling favorite event:", event)
+type FavoriteResponse = {
+  userId: string
+  productId: string
+}
+
+export const favoriteHandler: EventHandler<FavoriteResponse> = (event) => {
+  const { user, product } = event.data || {}
+  return {
+    userId: user,
+    productId: product
+  }
 }
