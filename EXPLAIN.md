@@ -9,8 +9,18 @@ Biblioteca leve de rastreamento de eventos para aplicações React, sem dependê
 ```
 src/
 ├── adapters/
-│   ├── console.ts       # Adapter de desenvolvimento: imprime eventos no console
-│   └── api.ts           # Adapter de produção: envia eventos via navigator.sendBeacon
+│   ├── console/
+│   │   ├── index.ts     # Adapter de desenvolvimento: imprime eventos no console
+│   │   └── handlers/
+│   │       ├── favorite.ts
+│   │       ├── addToCart.ts
+│   │       ├── bannerViewed.ts
+│   │       └── index.ts
+│   └── api/
+│       ├── index.ts     # Adapter de produção: envia eventos via navigator.sendBeacon
+│       └── handlers/
+│           ├── viewDetails.ts
+│           └── index.ts
 ├── hooks/
 │   └── useTrack.ts      # Hook React: expõe o método track para componentes
 ├── tracking/
@@ -18,7 +28,7 @@ src/
 │   ├── demo-setup.ts    # Demo only: registra os adapters no tracker singleton
 │   └── init-tracker.ts  # Rastreamento automático via data-event-name + data-event-click/data-event-view no DOM
 └── types/
-    └── index.ts         # Tipos compartilhados: TrackEvent, Adapter
+    └── index.ts         # Tipos compartilhados: TrackEvent, Adapter, EventHandler
 ```
 
 ### Fluxo de dados
@@ -247,6 +257,22 @@ Inicia o rastreamento automático de elementos com `data-event-name`. O `app` in
 | `MutationObserver` | — | Observa novos `[data-event-view]` adicionados ao DOM |
 
 A função é idempotente — chamadas subsequentes são ignoradas.
+
+### `EventHandler<TReturn = void>`
+
+Tipo para handlers individuais dentro de um adapter. O generic `TReturn` permite tipar o retorno da função:
+
+```ts
+import type { EventHandler } from '@kbm/events-tracker'
+
+// Retorno void (padrão)
+const myHandler: EventHandler = (event) => { ... }
+
+// Retorno tipado
+const myHandler: EventHandler<{ success: boolean }> = async (event) => {
+  return { success: true }
+}
+```
 
 ---
 

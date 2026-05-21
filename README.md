@@ -194,6 +194,22 @@ Ativa rastreamento automático em elementos com `data-event-name`. Instala três
 
 Idempotente — chamadas subsequentes são ignoradas.
 
+### `EventHandler<TReturn = void>`
+
+Tipo para handlers individuais dentro de um adapter. O generic `TReturn` permite tipar o retorno da função:
+
+```ts
+import type { EventHandler } from '@kbm/events-tracker'
+
+// Retorno void (padrão)
+const myHandler: EventHandler = (event) => { ... }
+
+// Retorno tipado
+const myHandler: EventHandler<{ success: boolean }> = async (event) => {
+  return { success: true }
+}
+```
+
 ---
 
 ## Integrações
