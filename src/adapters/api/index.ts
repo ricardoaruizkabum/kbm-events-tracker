@@ -9,9 +9,7 @@ const eventMap: Record<string, EventHandler<unknown>> = {
 
 export const apiAdapter: Adapter = async (event) => {
   const handler = eventMap[event.name]
-  if (!handler) {
-    return
-  }
+  if (!handler) return
   
   const result = handler(event)
   console.log(`🚀 Adapter: apiAdapter, event: ${event.name}`, result)  

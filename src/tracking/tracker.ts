@@ -11,7 +11,7 @@ class Tracker {
     this.adapters.push({ app, fn: adapter })
   }
 
-  track(event: TrackEvent) {
+  track(event: TrackEvent) {   
     const e = { ...event, ts: Date.now() }
     const queue = this.queues.get(e.app) ?? []
     queue.push(e)

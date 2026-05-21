@@ -10,9 +10,7 @@ const eventMap: Record<string, EventHandler<unknown>> = {
 
 export const consoleAdapter: Adapter = (event) => {
   const handler = eventMap[event.name]
-  if (!handler) {
-    return
-  }
+  if (!handler) return
 
   const result = handler(event)
   console.log(`🚀 Adapter: consoleAdapter, event: ${event.name}`, result)  
