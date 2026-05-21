@@ -6,3 +6,5 @@ export type TrackEvent = {
 }
 
 export type Adapter = (event: TrackEvent) => Promise<void> | void
+
+export type EventHandler = (event: TrackEvent) => Promise<void> | void

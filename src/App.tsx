@@ -31,6 +31,18 @@ export default function App() {
         Add To Cart (Auto Track)
       </button>
 
+      <br />
+      <br />
+
+      <button
+        data-event-click
+        data-event-name="view_details"
+        data-event-object='{"userId":"123","plan":"pro123"}'
+        // data-event-object={JSON.stringify({userId:"123",plan:"pro123"})}
+      >
+        View Details (Auto Track)
+      </button>
+
       <div style={{ height: "150vh", display: "flex", alignItems: "flex-end" }}>
         <p style={{ color: "#999" }}>↓ Role para baixo para disparar o evento</p>
       </div>

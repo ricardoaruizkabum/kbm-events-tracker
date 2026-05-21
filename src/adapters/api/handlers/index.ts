@@ -1,0 +1,1 @@
+export { viewDetailsHandler } from './viewDetails'
